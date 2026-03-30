@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotação Fênix — Gerente</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+  :root {
+    --verde: #1a6b3c; --verde-claro: #2d9e5f; --verde-bg: #e8f5ee;
+    --laranja: #e05b1a; --laranja-bg: #fdf0e8;
+    --cinza: #f4f4f2; --cinza-escuro: #888; --texto: #1a1a1a;
+    --sombra: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #f0f4f0; color: var(--texto); min-height: 100vh; padding-bottom: 90px; }
+
+  header {
+    background: var(--verde); color: white; padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 800; }
+  .logo span { color: #7de8a8; }
+  .loja-badge {
+    background: rgba(255,255,255,0.18); border-radius: 8px;
+    padding: 5px 11px; font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+    max-width: 150px; text-align: right; line-height: 1.4;
+  }
+
+  .container { max-width: 600px; margin: 0 auto; padding: 18px 14px; }
+
+  .card { background: white; border-radius: 14px; padding: 20px; box-shadow: var(--sombra); margin-bottom: 14px; }
+  .card h2 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+  .card p { font-size: 13px; color: var(--cinza-escuro); line-height: 1.6; }
+
+  .loja-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .loja-btn {
+    padding: 13px 8px; border-radius: 10px; border: 2px solid #e0e0e0;
+    background: white; cursor: pointer; font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700; color: var(--texto); transition: all 0.2s; text-align: center; line-height: 1.4;
+  }
+  .loja-btn:hover { border-color: var(--verde-claro); background: var(--verde-bg); }
+  .loja-btn.sel { border-color: var(--verde); background: var(--verde-bg); color: var(--verde); }
+
+  .cat-header {
+    background: var(--verde); color: white; border-radius: 9px;
+    padding: 7px 13px; font-family: 'Syne', sans-serif; font-size: 11px;
+    font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    margin: 14px 0 8px;
+  }
+
+  .prod-row {
+    background: white; border-radius: 10px; padding: 11px 13px;
+    box-shadow: var(--sombra); margin-bottom: 7px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .prod-info { flex: 1; min-width: 0; }
+  .prod-nome { font-size: 13px; font-weight: 500; }
+  .prod-sub { font-size: 11px; color: var(--cinza-escuro); margin-top: 3px; display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+  .forn-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 700; white-space: nowrap; }
+  .forn-a { background: var(--verde-bg); color: var(--verde); }
+  .forn-b { background: var(--laranja-bg); color: var(--laranja); }
+
+  .qtd-wrap { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .qtd-btn {
+    width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid #ddd;
+    background: white; font-size: 17px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--verde); font-weight: 700; transition: all 0.15s;
+  }
+  .qtd-btn:active { background: var(--verde-bg); }
+  .qtd-num {
+    width: 42px; text-align: center; border: 1.5px solid #e0e0e0; border-radius: 8px;
+    padding: 5px 2px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--texto); outline: none;
+  }
+  .qtd-num:focus { border-color: var(--verde-claro); }
+  .qtd-num.ok { border-color: var(--verde-claro); background: var(--verde-bg); color: var(--verde); }
+
+  .footer-fixo {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white; border-top: 1px solid #e8e8e8;
+    padding: 10px 18px; display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.08); z-index: 99;
+  }
+  .cnt-txt { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; color: #666; }
+  .cnt-num { color: var(--verde); font-size: 17px; font-weight: 800; }
+  .btn-enviar {
+    background: var(--verde); color: white; border: none; border-radius: 10px;
+    padding: 11px 18px; font-family: 'Syne', sans-serif; font-size: 13px;
+    font-weight: 700; cursor: pointer;
+  }
+  .btn-enviar:active { background: var(--verde-claro); }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; transition: all 0.2s; width: 100%; margin-bottom: 8px; }
+  .btn-verde { background: var(--verde); color: white; }
+  .btn-wpp { background: #25D366; color: white; }
+  .btn-cinza { background: #f0f0f0; color: #444; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: white; border-radius: 18px 18px 0 0; padding: 22px 18px 30px; width: 100%; max-width: 600px; }
+  .modal-box h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+  .modal-box p { font-size: 13px; color: var(--cinza-escuro); margin-bottom: 14px; line-height: 1.6; }
+  .codigo-box { background: #f4f4f2; border-radius: 10px; padding: 12px; font-family: monospace; font-size: 11px; word-break: break-all; color: #333; max-height: 80px; overflow-y: auto; margin-bottom: 14px; border: 1px solid #e0e0e0; user-select: all; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .chip { background: var(--verde-bg); color: var(--verde); border-radius: 20px; padding: 5px 12px; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; }
+
+  .data-bar { background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #7a6000; margin-bottom: 14px; }
+
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px); background: #1a1a1a; color: white; padding: 9px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; z-index: 300; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .erro-card { text-align: center; padding: 40px 20px; }
+  .erro-card .icon { font-size: 48px; margin-bottom: 12px; }
+  .erro-card h2 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .erro-card p { font-size: 13px; color: #888; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🌿 Cotação <span>Fênix</span></div>
+  <div class="loja-badge" id="badge-loja">Selecione<br>sua loja</div>
+</header>
+
+<div class="container">
+
+  <div id="tela-erro" class="card" style="display:none">
+    <div class="erro-card">
+      <div class="icon">⚠️</div>
+      <h2>Link inválido</h2>
+      <p>Peça para a matriz te enviar o link correto da cotação pelo WhatsApp.</p>
+    </div>
+  </div>
+
+  <div id="tela-loja" style="display:none">
+    <div class="card">
+      <h2>👋 Olá, gerente!</h2>
+      <p>Você recebeu a cotação de hoje. Toque na sua loja para começar.</p>
+      <div class="loja-grid" id="loja-grid"></div>
+      <div style="margin-top:14px">
+        <button class="btn btn-verde" id="btn-comecar" onclick="comecar()" disabled>✏️ Preencher Quantidades</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tela-form" style="display:none">
+    <div class="data-bar" id="data-bar"></div>
+    <div id="form-container"></div>
+  </div>
+
+</div>
+
+<div class="footer-fixo" id="footer-fixo" style="display:none">
+  <div class="cnt-txt">Itens: <span class="cnt-num" id="cnt">0</span></div>
+  <button class="btn-enviar" onclick="abrirModal()">📤 Concluir e Enviar</button>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <h3>✅ Pronto para enviar!</h3>
+    <p>Toque em "Copiar e abrir WhatsApp", cole o código na conversa com a matriz e envie.</p>
+    <div class="chips" id="chips"></div>
+    <div class="codigo-box" id="codigo-box"></div>
+    <button class="btn btn-wpp" onclick="copiarEWhatsApp()">📲 Copiar e abrir WhatsApp</button>
+    <button class="btn btn-cinza" onclick="fecharModal()">Fechar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+<script>
+const LOJAS = [
+  "Super Fenix - Sta Isabel",
+  "Fenix 219 - Neves",
+  "Nova Fenix - Porto do Rosa",
+  "Acácia - Porto da Pedra"
+];
+
+let cotacaoData = null;
+let lojaSel = null;
+let quantidades = {};
+let codigoGerado = '';
+
+// ===== INIT: LER E DESCOMPRIMIR DADOS DA URL =====
+window.onload = function() {
+  const params = new URLSearchParams(window.location.search);
+  const dados = params.get('dados');
+  const lojaParam = params.get('loja');
+
+  if (!dados) { document.getElementById('tela-erro').style.display = 'block'; return; }
+
+  try {
+    // Descomprimir: base64url → bytes → pako inflate → JSON
+    const b64 = dados.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const json = pako.inflate(bytes, { to: 'string' });
+    const raw = JSON.parse(json);
+    // Suporta formato enxuto (p/d) e formato completo (produtos/data)
+    if (raw.p) {
+      cotacaoData = {
+        data: raw.d,
+        produtos: raw.p.map(x => ({
+          cat: x.c, nome: x.n, un: x.u,
+          cxA: x.a, cxB: x.b, precoA: x.pa, precoB: x.pb
+        }))
+      };
+    } else {
+      cotacaoData = raw;
+    }
+
+    if (lojaParam && LOJAS.includes(decodeURIComponent(lojaParam))) {
+      lojaSel = decodeURIComponent(lojaParam);
+      renderForm();
+    } else {
+      renderLojas();
+      document.getElementById('tela-loja').style.display = 'block';
+    }
+  } catch(e) {
+    console.error('Erro ao descomprimir:', e);
+    document.getElementById('tela-erro').style.display = 'block';
+  }
+};
+
+function renderLojas() {
+  const grid = document.getElementById('loja-grid');
+  LOJAS.forEach(loja => {
+    const btn = document.createElement('button');
+    btn.className = 'loja-btn';
+    btn.textContent = loja;
+    btn.onclick = () => {
+      document.querySelectorAll('.loja-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+      lojaSel = loja;
+      document.getElementById('btn-comecar').disabled = false;
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function comecar() {
+  document.getElementById('tela-loja').style.display = 'none';
+  renderForm();
+}
+
+function venc(a, b) {
+  if (!a && !b) return 'N';
+  if (!a) return 'B';
+  if (!b) return 'A';
+  if (Math.abs(a-b) < 0.01) return 'E';
+  return a < b ? 'A' : 'B';
+}
+
+function renderForm() {
+  document.getElementById('badge-loja').textContent = lojaSel;
+  document.getElementById('data-bar').textContent = `📅 Cotação de ${cotacaoData.data || 'hoje'} — ${lojaSel}`;
+  document.getElementById('tela-form').style.display = 'block';
+  document.getElementById('footer-fixo').style.display = 'flex';
+
+  const c = document.getElementById('form-container');
+  c.innerHTML = '';
+  let lastCat = '';
+
+  cotacaoData.produtos.forEach(p => {
+    const v = venc(p.cxA, p.cxB);
+    if (v === 'N') return;
+
+    if (p.cat !== lastCat) {
+      const h = document.createElement('div');
+      h.className = 'cat-header';
+      h.textContent = p.cat;
+      c.appendChild(h);
+      lastCat = p.cat;
+    }
+
+    const forn = v === 'E' ? 'A' : v;
+    const preco = forn === 'A' ? p.cxA : p.cxB;
+    const precoLabel = preco ? `R$ ${preco.toFixed(2)} cx` : '—';
+    const safeId = 'q' + p.nome.replace(/[^a-z0-9]/gi, '_');
+    quantidades[p.nome] = { produto: p.nome, fornecedor: forn, peso: p.un, preco: preco || 0, qtd: '' };
+
+    const row = document.createElement('div');
+    row.className = 'prod-row';
+    row.innerHTML = `
+      <div class="prod-info">
+        <div class="prod-nome">${p.nome}</div>
+        <div class="prod-sub">
+          <span class="forn-tag ${forn==='A'?'forn-a':'forn-b'}">Forn. ${forn}</span>
+          <span>${precoLabel}</span>
+          <span>· ${p.un}</span>
+        </div>
+      </div>
+      <div class="qtd-wrap">
+        <button class="qtd-btn" onclick="adj('${p.nome}',-1)">−</button>
+        <input class="qtd-num" id="${safeId}" type="number" min="0" placeholder="0"
+          oninput="salvar('${p.nome}',this)">
+        <button class="qtd-btn" onclick="adj('${p.nome}',1)">+</button>
+      </div>
+    `;
+    c.appendChild(row);
+  });
+  atualizarCnt();
+}
+
+function salvar(key, el) {
+  quantidades[key].qtd = el.value;
+  el.classList.toggle('ok', !!el.value && el.value !== '0');
+  atualizarCnt();
+}
+
+function adj(key, d) {
+  const safeId = 'q' + key.replace(/[^a-z0-9]/gi, '_');
+  const el = document.getElementById(safeId);
+  const n = Math.max(0, (parseInt(el.value) || 0) + d);
+  el.value = n || '';
+  quantidades[key].qtd = el.value;
+  el.classList.toggle('ok', !!el.value && el.value !== '0');
+  atualizarCnt();
+}
+
+function atualizarCnt() {
+  document.getElementById('cnt').textContent =
+    Object.values(quantidades).filter(q => q.qtd && q.qtd !== '0').length;
+}
+
+// ===== GERAR CÓDIGO DE RESPOSTA =====
+function abrirModal() {
+  const itens = Object.values(quantidades).filter(q => q.qtd && q.qtd !== '0');
+  if (!itens.length) { toast('⚠️ Preencha pelo menos um produto!'); return; }
+
+  const saida = { loja: lojaSel, data: cotacaoData.data || new Date().toLocaleDateString('pt-BR'), itens };
+  // Comprime a resposta também para o código ficar curto
+  const json = JSON.stringify(saida);
+  const compressed = pako.deflate(json, { level: 9 });
+  codigoGerado = btoa(String.fromCharCode(...compressed))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  document.getElementById('chips').innerHTML = `
+    <div class="chip">${itens.length} produtos</div>
+    <div class="chip">${itens.filter(i=>i.fornecedor==='A').length} Forn. A</div>
+    <div class="chip">${itens.filter(i=>i.fornecedor==='B').length} Forn. B</div>
+  `;
+  document.getElementById('codigo-box').textContent = codigoGerado;
+  document.getElementById('modal').classList.add('show');
+}
+
+function fecharModal() { document.getElementById('modal').classList.remove('show'); }
+
+function copiarEWhatsApp() {
+  const msg = `🌿 *Cotação Fênix — ${lojaSel}*\n\nMinha resposta de quantidades:\n\n${codigoGerado}`;
+  const copiar = () => {
+    toast('✅ Copiado! Abrindo WhatsApp...');
+    setTimeout(() => window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank'), 600);
+  };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(codigoGerado).then(copiar).catch(() => { fallbackCopy(); copiar(); });
+  } else { fallbackCopy(); copiar(); }
+}
+
+function fallbackCopy() {
+  const t = document.createElement('textarea');
+  t.value = codigoGerado;
+  document.body.appendChild(t); t.select();
+  document.execCommand('copy'); document.body.removeChild(t);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
