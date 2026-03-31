@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotação Fênix</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --verde: #1a6b3c;
+    --verde-claro: #2d9e5f;
+    --verde-bg: #e8f5ee;
+    --laranja: #e05b1a;
+    --laranja-bg: #fdf0e8;
+    --cinza: #f4f4f2;
+    --cinza-escuro: #888;
+    --texto: #1a1a1a;
+    --branco: #fff;
+    --sombra: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0f4f0;
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--verde);
+    color: white;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+  }
+
+  header .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  header .logo span { color: #7de8a8; }
+
+  header .sub {
+    font-size: 13px;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+
+  .container { max-width: 1300px; margin: 0 auto; padding: 28px 20px; }
+
+  /* ABAS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: white;
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: var(--sombra);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 0;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--cinza-escuro);
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+  }
+
+  .tab.active {
+    background: var(--verde);
+    color: white;
+    box-shadow: 0 2px 8px rgba(26,107,60,0.3);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* CARDS DE FORNECEDOR */
+  .fornecedores-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  @media(max-width: 700px) { .fornecedores-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--sombra);
+  }
+
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-a { background: var(--verde-bg); color: var(--verde); }
+  .badge-b { background: var(--laranja-bg); color: var(--laranja); }
+
+  .upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--cinza);
+  }
+
+  .upload-area:hover, .upload-area.drag { border-color: var(--verde-claro); background: var(--verde-bg); }
+  .upload-area.loaded { border-color: var(--verde-claro); background: var(--verde-bg); border-style: solid; }
+
+  .upload-area .icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-area p { font-size: 13px; color: var(--cinza-escuro); }
+  .upload-area p strong { color: var(--texto); }
+  .upload-area input { display: none; }
+
+  .status-ok { color: var(--verde-claro); font-size: 13px; font-weight: 500; margin-top: 8px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .btn-verde { background: var(--verde); color: white; }
+  .btn-verde:hover { background: var(--verde-claro); }
+  .btn-verde:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-laranja { background: var(--laranja); color: white; }
+  .btn-laranja:hover { background: #c44d12; }
+  .btn-outline { background: white; color: var(--verde); border: 2px solid var(--verde); }
+  .btn-outline:hover { background: var(--verde-bg); }
+
+  .acoes { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+
+  /* TABELA DE COMPARAÇÃO */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pill {
+    font-size: 12px;
+    background: var(--verde-bg);
+    color: var(--verde);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  .tabela-wrap { overflow-x: auto; border-radius: 14px; box-shadow: var(--sombra); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: var(--verde);
+    color: white;
+    padding: 12px 14px;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.15s; }
+  tbody tr:hover { background: #fafafa; }
+
+  td { padding: 10px 14px; vertical-align: middle; }
+
+  td.nome { font-weight: 500; color: #222; }
+
+  td.preco { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px; }
+  td.preco.vencedor { color: var(--verde); }
+  td.preco.perdedor { color: #bbb; }
+  td.preco.indisponivel { color: #ddd; font-weight: 400; font-size: 12px; }
+  td.preco.empate { color: #e0a01a; }
+
+  .vencedor-badge {
+    display: inline-block;
+    background: var(--verde);
+    color: white;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  .categoria-row td {
+    background: #f8f8f6;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 7px 14px;
+  }
+
+  /* PEDIDOS */
+  .lojas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .loja-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--sombra);
+  }
+
+  .loja-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--verde-bg);
+    color: var(--verde);
+  }
+
+  .qtd-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 10px;
+  }
+
+  .qtd-row:last-child { border-bottom: none; }
+
+  .qtd-nome {
+    font-size: 12px;
+    flex: 1;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .qtd-nome .forn-tag {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+
+  .forn-a { background: var(--verde-bg); color: var(--verde); }
+  .forn-b { background: var(--laranja-bg); color: var(--laranja); }
+
+  .qtd-input {
+    width: 70px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texto);
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  .qtd-input:focus { border-color: var(--verde-claro); }
+
+  /* MENSAGENS WHATSAPP */
+  .wpp-block {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--sombra);
+    margin-bottom: 20px;
+  }
+
+  .wpp-block h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .wpp-text {
+    background: #e8f5e1;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    font-family: monospace;
+    color: #1a3a1a;
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid #c8e8c0;
+  }
+
+  .copy-btn {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 7px;
+    border: none;
+    background: #25D366;
+    color: white;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .copy-btn:hover { background: #1fba57; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--cinza-escuro);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; }
+
+  .filtro-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filtro-bar input {
+    flex: 1;
+    min-width: 180px;
+    padding: 9px 14px;
+    border-radius: 9px;
+    border: 1px solid #ddd;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .filtro-bar input:focus { border-color: var(--verde-claro); }
+
+  select.filtro-select {
+    padding: 9px 14px;
+    border-radius: 9px;
+    border: 1px solid #ddd;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    background: white;
+    cursor: pointer;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--verde);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: var(--verde);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--verde-bg);
+    border-top-color: var(--verde);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .resumo-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .resumo-card {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 20px;
+    box-shadow: var(--sombra);
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .resumo-card .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .resumo-card .label { font-size: 11px; color: var(--cinza-escuro); margin-top: 4px; }
+  .num-verde { color: var(--verde); }
+  .num-laranja { color: var(--laranja); }
+  .num-azul { color: #1a5cb3; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">🌿 Cotação <span>Fênix</span></div>
+    <div class="sub">Sistema de cotação de FLV — Super Fênix & Lojas</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('importar')">📥 1. Importar PDFs</button>
+    <button class="tab" onclick="showTab('comparar')">📊 2. Comparar Preços</button>
+    <button class="tab" onclick="showTab('gerentes')">👥 3. Gerentes</button>
+    <button class="tab" onclick="showTab('pedidos')">🛒 4. Quantidades</button>
+    <button class="tab" onclick="showTab('whatsapp')">💬 5. Gerar Pedidos</button>
+  </div>
+
+  <!-- ABA 1: IMPORTAR -->
+  <div id="tab-importar" class="panel active">
+    <div class="fornecedores-grid">
+      <div class="card">
+        <h3>📦 Fornecedor A <span class="badge badge-a">Recheio</span></h3>
+        <div class="upload-area" id="drop-a" onclick="document.getElementById('file-a').click()"
+          ondragover="ev(event)" ondrop="drop(event,'a')">
+          <div class="icon">📄</div>
+          <p><strong>Clique ou arraste o PDF</strong></p>
+          <p>Tabela de preços do Recheio</p>
+          <input type="file" id="file-a" accept=".pdf" onchange="loadPDF(event,'a')">
+        </div>
+        <div id="status-a" class="status-ok" style="display:none">✅ PDF carregado com sucesso!</div>
+      </div>
+
+      <div class="card">
+        <h3>📦 Fornecedor B <span class="badge badge-b">Santo Inácio</span></h3>
+        <div class="upload-area" id="drop-b" onclick="document.getElementById('file-b').click()"
+          ondragover="ev(event)" ondrop="drop(event,'b')">
+          <div class="icon">📄</div>
+          <p><strong>Clique ou arraste o PDF</strong></p>
+          <p>Lista de entrega do Santo Inácio</p>
+          <input type="file" id="file-b" accept=".pdf" onchange="loadPDF(event,'b')">
+        </div>
+        <div id="status-b" class="status-ok" style="display:none">✅ PDF carregado com sucesso!</div>
+      </div>
+    </div>
+
+    <div class="loading" id="loading-text"><span class="spinner"></span> <span id="loading-msg">Extraindo preços com IA...</span></div>
+
+    <div class="acoes">
+      <button class="btn btn-verde" id="btn-processar" onclick="processarPDFs()" disabled>
+        ⚡ Processar e Comparar
+      </button>
+    </div>
+  </div>
+
+  <!-- ABA 2: COMPARAR -->
+  <div id="tab-comparar" class="panel">
+    <div id="comparar-empty" class="empty-state">
+      <div class="icon">📊</div>
+      <p>Importe os PDFs na aba anterior para ver a comparação</p>
+    </div>
+    <div id="comparar-content" style="display:none">
+      <div class="resumo-bar">
+        <div class="resumo-card"><div class="num num-verde" id="r-fornA">0</div><div class="label">Vencedor Forn. A</div></div>
+        <div class="resumo-card"><div class="num num-laranja" id="r-fornB">0</div><div class="label">Vencedor Forn. B</div></div>
+        <div class="resumo-card"><div class="num num-azul" id="r-empate">0</div><div class="label">Empate</div></div>
+        <div class="resumo-card"><div class="num" id="r-total">0</div><div class="label">Produtos</div></div>
+      </div>
+      <div class="filtro-bar">
+        <input type="text" id="filtro-busca" placeholder="🔍 Buscar produto..." oninput="filtrarTabela()">
+        <select class="filtro-select" id="filtro-cat" onchange="filtrarTabela()">
+          <option value="">Todas as categorias</option>
+        </select>
+        <select class="filtro-select" id="filtro-venc" onchange="filtrarTabela()">
+          <option value="">Todos os resultados</option>
+          <option value="A">Vencedor: Forn. A</option>
+          <option value="B">Vencedor: Forn. B</option>
+          <option value="E">Empate</option>
+          <option value="N">Só disponível em 1</option>
+        </select>
+      </div>
+      <div class="tabela-wrap">
+        <table id="tabela-comparacao">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Peso/Unid</th>
+              <th>💚 Forn. A (R$/kg)</th>
+              <th>🧡 Forn. B (R$/kg)</th>
+              <th>🏆 Vencedor</th>
+              <th>Economia</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-body"></tbody>
+        </table>
+      </div>
+      <div class="acoes" style="margin-top:20px">
+        <button class="btn btn-verde" onclick="showTab('gerentes')">👥 Enviar para Gerentes →</button>
+        <button class="btn btn-outline" onclick="irParaPedidos()">🛒 Preencher eu mesmo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA 3: GERENTES -->
+  <div id="tab-gerentes" class="panel">
+    <div id="gerentes-empty" class="empty-state">
+      <div class="icon">👥</div>
+      <p>Processe os PDFs primeiro para liberar o painel de gerentes</p>
+    </div>
+    <div id="gerentes-content" style="display:none">
+      <div class="fornecedores-grid">
+        <div class="card">
+          <h3>📲 Enviar cotação para gerentes</h3>
+          <p style="font-size:13px;color:#888;margin-bottom:16px">Gere um link para cada gerente. Eles abrem direto no celular, preenchem as quantidades e te mandam o código de resposta pelo WhatsApp.</p>
+          <button class="btn btn-verde" onclick="exportarCotacaoParaGerentes()" style="width:100%;justify-content:center">
+            🔗 Gerar links para os gerentes
+          </button>
+        </div>
+        <div class="card">
+          <h3>📥 Receber resposta dos gerentes</h3>
+          <p style="font-size:13px;color:#888;margin-bottom:10px">Cole aqui o código que o gerente te mandou pelo WhatsApp:</p>
+          <textarea id="resposta-texto" placeholder="Cole o código do gerente aqui..." style="width:100%;height:80px;border:1.5px solid #e0e0e0;border-radius:8px;padding:10px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;resize:none"></textarea>
+          <button class="btn btn-verde" onclick="processarRespostaTexto()" style="width:100%;justify-content:center;margin-top:8px">
+            ✅ Processar resposta
+          </button>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">Status das respostas <span class="pill" id="pill-gerentes">0 / 4</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px" id="status-gerentes"></div>
+
+      <div class="acoes">
+        <button class="btn btn-verde" onclick="irParaPedidos()">🛒 Ver Quantidades Consolidadas →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL LINKS -->
+  <div id="modal-links" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;padding:16px">
+    <div style="background:white;border-radius:16px;padding:24px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800">🔗 Links dos Gerentes</div>
+        <button onclick="fecharModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888">✕</button>
+      </div>
+      <p style="font-size:13px;color:#888;margin-bottom:16px">Copie o link ou abra direto no WhatsApp para cada gerente:</p>
+      <div id="links-container"></div>
+    </div>
+  </div>
+
+  <!-- ABA 4: PEDIDOS -->
+  <div id="tab-pedidos" class="panel">
+    <div id="pedidos-empty" class="empty-state">
+      <div class="icon">🛒</div>
+      <p>Compare os preços primeiro para definir os pedidos</p>
+    </div>
+    <div id="pedidos-content" style="display:none">
+      <div class="section-title">Quantidades por Loja <span class="pill">4 lojas</span></div>
+      <div class="lojas-grid" id="lojas-grid"></div>
+      <div class="acoes">
+        <button class="btn btn-verde" onclick="gerarWhatsApp()">💬 Gerar Mensagens WhatsApp →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA 4: WHATSAPP -->
+  <div id="tab-whatsapp" class="panel">
+    <div id="wpp-empty" class="empty-state">
+      <div class="icon">💬</div>
+      <p>Defina as quantidades primeiro para gerar os pedidos</p>
+    </div>
+    <div id="wpp-content" style="display:none">
+      <div class="section-title">Pedidos Prontos para WhatsApp</div>
+      <div id="wpp-blocos"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const LOJAS = [
+  "Super Fenix - Sta Isabel",
+  "Fenix 219 - Neves",
+  "Nova Fenix - Porto do Rosa",
+  "Acácia - Porto da Pedra"
+];
+
+let pdfTexts = { a: null, b: null };
+let dadosComparacao = [];
+let quantidades = {}; // {produto: {loja: qtd}}
+
+// ===== UPLOAD PDF =====
+function ev(e) { e.preventDefault(); }
+function drop(e, forn) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file, forn);
+}
+function loadPDF(e, forn) {
+  const file = e.target.files[0];
+  if (file) processFile(file, forn);
+}
+
+async function processFile(file, forn) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    // Preservar quebras de linha para manter estrutura da tabela
+    const items = content.items;
+    let lastY = null;
+    for (const item of items) {
+      if (lastY !== null && Math.abs(item.transform[5] - lastY) > 3) text += '\n';
+      text += item.str + ' ';
+      lastY = item.transform[5];
+    }
+    text += '\n--- PÁGINA ' + i + ' ---\n';
+  }
+  pdfTexts[forn] = text;
+  document.getElementById('drop-' + forn).classList.add('loaded');
+  document.getElementById('status-' + forn).style.display = 'block';
+  if (pdfTexts.a && pdfTexts.b) document.getElementById('btn-processar').disabled = false;
+}
+
+// ===== EXTRAÇÃO REAL VIA CLAUDE API =====
+async function processarPDFs() {
+  document.getElementById('loading-text').style.display = 'block';
+  document.getElementById('btn-processar').disabled = true;
+
+  try {
+    document.getElementById('loading-msg').textContent = 'Extraindo preços do Recheio...';
+    const produtosA = await extrairProdutosPDF(pdfTexts.a, 'Recheio');
+
+    document.getElementById('loading-msg').textContent = 'Extraindo preços do Santo Inácio...';
+    const produtosB = await extrairProdutosPDF(pdfTexts.b, 'Santo Inácio');
+
+    document.getElementById('loading-msg').textContent = 'Cruzando e comparando...';
+    dadosComparacao = cruzarProdutos(produtosA, produtosB);
+
+    document.getElementById('loading-text').style.display = 'none';
+    document.getElementById('btn-processar').disabled = false;
+    mostrarComparacao();
+    mostrarPainelGerentes();
+    showTab('comparar');
+    toast('✅ ' + dadosComparacao.length + ' produtos extraídos e comparados!');
+  } catch(e) {
+    document.getElementById('loading-text').style.display = 'none';
+    document.getElementById('btn-processar').disabled = false;
+    toast('❌ Erro ao processar: ' + e.message);
+    console.error(e);
+  }
+}
+
+async function extrairProdutosPDF(textoRaw, nomeForncedor) {
+  const prompt = `Você é um extrator de dados de tabelas de preços de hortifrúti.
+
+Analise o texto abaixo extraído de um PDF do fornecedor "${nomeForncedor}" e extraia TODOS os produtos com preço disponível (R$ CAIXA maior que zero).
+
+Para cada produto, extraia:
+- nome: nome do produto (limpo, sem abreviações desnecessárias)
+- categoria: uma de [FRUTAS, FRUTAS CÂMARA, LEGUMES, ALHO CEBOLA E OVOS, EXÓTICOS]
+- peso: peso ou quantidade por caixa/unidade (ex: "18kg", "10un", "24pct")
+- cx: preço da caixa em reais (número decimal, ex: 58.00)
+- kg: preço por kg/unidade (número decimal, ex: 3.22)
+
+Regras:
+- Ignore produtos com preço zero ou sem preço
+- Para o Santo Inácio, o campo "VA." é o preço da caixa
+- Retorne APENAS um JSON válido, sem texto antes ou depois
+- Formato: {"produtos": [{"nome":"...","cat":"...","peso":"...","cx":0.0,"kg":0.0}]}
+
+Texto do PDF:
+${textoRaw.substring(0, 12000)}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) throw new Error('Erro na API: ' + response.status);
+  const data = await response.json();
+  const texto = data.content[0].text;
+
+  // Extrair JSON mesmo se vier com texto ao redor
+  const match = texto.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Resposta da IA não contém JSON válido');
+  const resultado = JSON.parse(match[0]);
+  return resultado.produtos || [];
+}
+
+// ===== CRUZAR PRODUTOS DOS DOIS FORNECEDORES =====
+function cruzarProdutos(produtosA, produtosB) {
+  // Mapa de equivalências conhecidas
+  const equivalencias = {
+    'batata p.45': 'batata inglesa',
+    'batata p45': 'batata inglesa',
+    'batata doce saco': 'batata doce',
+    'batata doce ggg': 'batata doce',
+    'batata doce aaa': 'batata doce',
+    'ab sergipana': 'abóbora sergipana',
+    'abobora sergipana': 'abóbora sergipana',
+    'ab baiana': 'abóbora baiana',
+    'abobora baiana': 'abóbora baiana',
+    'abobrinha italiana': 'abobrinha',
+    'm.formosa': 'mamão formosa',
+    'mam formosa': 'mamão formosa',
+    'm.papaya': 'mamão papaia',
+    'mam papaia': 'mamão papaia',
+    'maracujá cx': 'maracujá',
+    'laranja natal': 'laranja seleta/natal',
+    'laranja seleta': 'laranja seleta/natal',
+    'mç gala': 'maçã gala cat.1',
+    'maçã gala c. bonito cat.1 t.120': 'maçã gala cat.1 t.120',
+    'maçã gala c. bonito cat.1 t.135': 'maçã gala cat.1 t.135',
+    'maçã gala cat.1 t.120 capão bonito': 'maçã gala cat.1 t.120',
+    'uva rede globe': 'uva red globe',
+  };
+
+  function normalizar(nome) {
+    let n = nome.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9 ]/g, ' ')
+      .replace(/\s+/g, ' ').trim();
+    return equivalencias[n] || n;
+  }
+
+  // Indexar produtos B por nome normalizado
+  const mapaB = {};
+  produtosB.forEach(p => {
+    const chave = normalizar(p.nome);
+    if (!mapaB[chave]) mapaB[chave] = p;
+  });
+
+  const resultado = [];
+  const usadosB = new Set();
+
+  // Para cada produto A, tentar encontrar equivalente em B
+  produtosA.forEach(pA => {
+    const chaveA = normalizar(pA.nome);
+    const pB = mapaB[chaveA];
+
+    resultado.push({
+      cat: pA.cat || 'OUTROS',
+      nome: pA.nome,
+      un: pB ? `${pA.peso || ''} / ${pB.peso || ''}` : (pA.peso || ''),
+      cxA: pA.cx || null,
+      cxB: pB ? (pB.cx || null) : null,
+      precoA: pA.kg || null,
+      precoB: pB ? (pB.kg || null) : null,
+    });
+
+    if (pB) usadosB.add(chaveA);
+  });
+
+  // Adicionar produtos exclusivos do B (não encontrados em A)
+  produtosB.forEach(pB => {
+    const chaveB = normalizar(pB.nome);
+    if (!usadosB.has(chaveB)) {
+      resultado.push({
+        cat: pB.cat || 'OUTROS',
+        nome: pB.nome,
+        un: pB.peso || '',
+        cxA: null,
+        cxB: pB.cx || null,
+        precoA: null,
+        precoB: pB.kg || null,
+      });
+    }
+  });
+
+  // Ordenar por categoria e nome
+  const ordemCat = ['FRUTAS', 'FRUTAS CÂMARA', 'EXÓTICOS', 'LEGUMES', 'ALHO CEBOLA E OVOS', 'OUTROS'];
+  resultado.sort((a, b) => {
+    const oi = ordemCat.indexOf(a.cat.toUpperCase()) - ordemCat.indexOf(b.cat.toUpperCase());
+    if (oi !== 0) return oi;
+    return a.nome.localeCompare(b.nome, 'pt-BR');
+  });
+
+  return resultado;
+}
+
+// Mantido para compatibilidade mas não usado mais
+function getDadosPDFs() { return []; }
+function carregarDemostracao() { toast('⚠️ Carregue os PDFs do Recheio e Santo Inácio para usar o sistema.'); }
+
+function getDadosPDFs() {
+  // precoA/B = preço por kg (exibição), cxA/cxB = preço de caixa (comparação)
+  return [
+    // FRUTAS
+    { cat: 'FRUTAS', nome: 'Abacate', un: 'CX 18kg', cxA: 58.00, cxB: 48.00, pesoA: 18, pesoB: 18, precoA: 3.22, precoB: 2.67 },
+    { cat: 'FRUTAS', nome: 'Abacaxi Graúdo', un: 'CX 10un', cxA: 90.00, cxB: 78.00, pesoA: 10, pesoB: 10, precoA: 9.00, precoB: 7.80 },
+    { cat: 'FRUTAS', nome: 'Banana da Terra', un: 'CX 18-20kg', cxA: 130.00, cxB: 100.00, pesoA: 20, pesoB: 18, precoA: 6.50, precoB: 5.56 },
+    { cat: 'FRUTAS', nome: 'Banana Prata', un: 'CX 20kg', cxA: 105.00, cxB: 100.00, pesoA: 20, pesoB: 20, precoA: 5.25, precoB: 5.00 },
+    { cat: 'FRUTAS', nome: "Banana D'Água", un: 'CX 20kg', cxA: 85.00, cxB: 60.00, pesoA: 20, pesoB: 20, precoA: 4.25, precoB: 3.00 },
+    { cat: 'FRUTAS', nome: 'Coco Seco', un: 'CX 14-15kg', cxA: 58.00, cxB: 48.00, pesoA: 14, pesoB: 15, precoA: 4.14, precoB: 3.20 },
+    { cat: 'FRUTAS', nome: 'Coco Verde', un: 'SC/CX 10un', cxA: 55.00, cxB: 50.00, pesoA: 10, pesoB: 10, precoA: 5.50, precoB: 5.00 },
+    { cat: 'FRUTAS', nome: 'Laranja Lima', un: 'CX 18-19kg', cxA: 120.00, cxB: 103.00, pesoA: 18, pesoB: 19, precoA: 6.67, precoB: 5.42 },
+    { cat: 'FRUTAS', nome: 'Laranja Seleta/Natal', un: 'CX 19-20kg', cxA: 85.00, cxB: 75.00, pesoA: 20, pesoB: 19, precoA: 4.25, precoB: 3.95 },
+    { cat: 'FRUTAS', nome: 'Laranja Pêra', un: 'CX 18kg', cxA: 58.00, cxB: null, pesoA: 18, pesoB: null, precoA: 2.90, precoB: null },
+    { cat: 'FRUTAS', nome: 'Limão Saco', un: 'SC 19-20kg', cxA: 55.00, cxB: 40.00, pesoA: 20, pesoB: 19, precoA: 2.75, precoB: 2.11 },
+    { cat: 'FRUTAS', nome: 'Manga Palmer', un: 'CX 17kg', cxA: 80.00, cxB: 83.00, pesoA: 17, pesoB: 17, precoA: 4.71, precoB: 4.88 },
+    { cat: 'FRUTAS', nome: 'Manga Tommy', un: 'CX 17kg', cxA: 88.00, cxB: 89.00, pesoA: 17, pesoB: 17, precoA: 5.18, precoB: 5.24 },
+    { cat: 'FRUTAS', nome: 'Maracujá', un: 'CX 9-10kg', cxA: 96.00, cxB: 110.00, pesoA: 9, pesoB: 10, precoA: 10.67, precoB: 11.00 },
+    { cat: 'FRUTAS', nome: 'Melancia kg', un: 'kg', cxA: 2.90, cxB: 2.30, pesoA: 1, pesoB: 1, precoA: 2.90, precoB: 2.30 },
+    { cat: 'FRUTAS', nome: 'Melão Amarelo CX Papelão', un: 'CX 13kg', cxA: 65.00, cxB: 50.00, pesoA: 13, pesoB: 13, precoA: 5.00, precoB: 3.85 },
+    { cat: 'FRUTAS', nome: 'Melão Amarelo CX Madeira', un: 'CX 18-20kg', cxA: 84.00, cxB: 84.00, pesoA: 18, pesoB: 20, precoA: 4.67, precoB: 4.20 },
+    { cat: 'FRUTAS', nome: 'Melão Rei', un: 'CX 10kg', cxA: 120.00, cxB: 100.00, pesoA: 10, pesoB: 10, precoA: 12.00, precoB: 10.00 },
+    { cat: 'FRUTAS', nome: 'Melão Orange', un: 'CX 5kg', cxA: 58.00, cxB: 57.00, pesoA: 5, pesoB: 5, precoA: 11.60, precoB: 11.40 },
+    { cat: 'FRUTAS', nome: 'Mamão Formosa', un: 'CX 14-16kg', cxA: 65.00, cxB: 50.00, pesoA: 16, pesoB: 14, precoA: 4.06, precoB: 3.57 },
+    { cat: 'FRUTAS', nome: 'Mamão Papaia T.14', un: 'CX 14un', cxA: 45.00, cxB: 43.00, pesoA: 14, pesoB: 14, precoA: 3.21, precoB: 3.07 },
+    { cat: 'FRUTAS', nome: 'Mamão Papaia T.17', un: 'CX 17un', cxA: 43.00, cxB: 43.00, pesoA: 17, pesoB: 17, precoA: 2.53, precoB: 2.53 },
+    { cat: 'FRUTAS', nome: 'Caqui', un: 'CX 4bdj/14kg', cxA: 28.00, cxB: 75.00, pesoA: 4, pesoB: 14, precoA: 7.00, precoB: 5.36 },
+    // FRUTAS CÂMARA
+    { cat: 'FRUTAS CÂMARA', nome: 'Ameixa Nacional/Importada', un: 'CX 6-9kg', cxA: 48.00, cxB: 130.00, pesoA: 6, pesoB: 9, precoA: 8.00, precoB: 14.44 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Maçã Fuji Cat.1', un: 'CX 18kg', cxA: 197.00, cxB: 205.00, pesoA: 18, pesoB: 18, precoA: 10.94, precoB: 11.39 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Maçã Gala Cat.1 T.135', un: 'CX 18kg', cxA: 165.00, cxB: 115.00, pesoA: 18, pesoB: 18, precoA: 9.17, precoB: 6.39 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Maçã Gala Cat.1 T.120', un: 'CX 18kg', cxA: 170.00, cxB: 120.00, pesoA: 18, pesoB: 18, precoA: 9.44, precoB: 6.67 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Maçã Gala Cat.3 T.135/150', un: 'CX 18kg', cxA: 84.00, cxB: 80.00, pesoA: 18, pesoB: 18, precoA: 4.67, precoB: 4.44 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Maçã Gala Embalada 24x850g', un: 'CX 24pct', cxA: 123.00, cxB: 119.00, pesoA: 24, pesoB: 24, precoA: 5.13, precoB: 4.96 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Maçã Red Argentina', un: 'CX 18kg', cxA: 275.00, cxB: 210.00, pesoA: 18, pesoB: 18, precoA: 15.28, precoB: 11.67 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Kiwi Importado', un: 'CX 8-9kg', cxA: 220.00, cxB: 198.00, pesoA: 8, pesoB: 9, precoA: 27.50, precoB: 22.00 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Limão Siciliano', un: 'CX 14-15kg', cxA: 170.00, cxB: 155.00, pesoA: 14, pesoB: 15, precoA: 12.14, precoB: 10.33 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Pera Portuguesa', un: 'CX 9kg', cxA: 155.00, cxB: 149.00, pesoA: 9, pesoB: 9, precoA: 17.22, precoB: 16.56 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Pera Williams T.90', un: 'CX 18kg', cxA: 165.00, cxB: 149.00, pesoA: 18, pesoB: 18, precoA: 9.17, precoB: 8.28 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Pêssego Importado', un: 'CX 10-12kg', cxA: 155.00, cxB: 149.00, pesoA: 10, pesoB: 12, precoA: 15.50, precoB: 12.42 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Uva Red Globe', un: 'CX 8kg', cxA: 124.00, cxB: 149.00, pesoA: 8, pesoB: 8, precoA: 15.50, precoB: 18.63 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Uva Thompson Embalada', un: 'CX 10bdj', cxA: 84.00, cxB: 74.00, pesoA: 10, pesoB: 10, precoA: 8.40, precoB: 7.40 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Uva Rosada Embalada', un: 'CX 10bdj', cxA: 55.00, cxB: 55.00, pesoA: 10, pesoB: 10, precoA: 5.50, precoB: 5.50 },
+    { cat: 'FRUTAS CÂMARA', nome: 'Uva Vitória Embalada', un: 'CX 10bdj', cxA: 84.00, cxB: 72.00, pesoA: 10, pesoB: 10, precoA: 8.40, precoB: 7.20 },
+    // LEGUMES
+    { cat: 'LEGUMES', nome: 'Abóbora Baiana', un: 'SC 20kg', cxA: 66.00, cxB: 56.00, pesoA: 20, pesoB: 20, precoA: 3.30, precoB: 2.80 },
+    { cat: 'LEGUMES', nome: 'Abóbora Sergipana', un: 'SC 20kg', cxA: 76.00, cxB: 65.00, pesoA: 20, pesoB: 20, precoA: 3.80, precoB: 3.60 },
+    { cat: 'LEGUMES', nome: 'Abobrinha', un: 'CX 15-16kg', cxA: 138.00, cxB: 130.00, pesoA: 15, pesoB: 16, precoA: 9.20, precoB: 8.13 },
+    { cat: 'LEGUMES', nome: 'Aipim', un: 'CX 20kg', cxA: 64.00, cxB: 55.00, pesoA: 20, pesoB: 20, precoA: 3.20, precoB: 2.75 },
+    // Equivalência: Batata Inglesa (A) = Batata p.45 (B)
+    { cat: 'LEGUMES', nome: 'Batata Inglesa', un: 'SC 24-24.5kg', cxA: 79.00, cxB: 65.00, pesoA: 24, pesoB: 24.5, precoA: 3.29, precoB: 2.65 },
+    { cat: 'LEGUMES', nome: 'Batata Asterix', un: 'SC 24-24.5kg', cxA: 80.00, cxB: 68.00, pesoA: 24, pesoB: 24.5, precoA: 3.33, precoB: 2.78 },
+    // Equivalência: Batata Doce GGG (A) = Batata Doce Saco (B)
+    { cat: 'LEGUMES', nome: 'Batata Doce', un: 'SC 18kg', cxA: 50.00, cxB: 55.00, pesoA: 18, pesoB: 18, precoA: 2.78, precoB: 3.06 },
+    { cat: 'LEGUMES', nome: 'Beterraba', un: 'SC 18kg', cxA: 90.00, cxB: 90.00, pesoA: 18, pesoB: 18, precoA: 5.00, precoB: 5.00 },
+    { cat: 'LEGUMES', nome: 'Berinjela', un: 'CX 10kg', cxA: 80.00, cxB: 70.00, pesoA: 10, pesoB: 10, precoA: 8.00, precoB: 7.00 },
+    { cat: 'LEGUMES', nome: 'Cará', un: 'CX 14-18kg', cxA: 140.00, cxB: 135.00, pesoA: 14, pesoB: 18, precoA: 10.00, precoB: 7.50 },
+    { cat: 'LEGUMES', nome: 'Cenoura G', un: 'CX 19-20kg', cxA: 100.00, cxB: 100.00, pesoA: 20, pesoB: 19.5, precoA: 5.00, precoB: 5.13 },
+    { cat: 'LEGUMES', nome: 'Cenoura AAA', un: 'CX 19-20kg', cxA: 110.00, cxB: null, pesoA: 20, pesoB: null, precoA: 5.50, precoB: null },
+    { cat: 'LEGUMES', nome: 'Chuchu', un: 'CX 18kg', cxA: 55.00, cxB: 40.00, pesoA: 18, pesoB: 18, precoA: 3.06, precoB: 2.22 },
+    { cat: 'LEGUMES', nome: 'Inhame AAA', un: 'SC 18kg', cxA: 120.00, cxB: 120.00, pesoA: 18, pesoB: 18, precoA: 6.67, precoB: 6.67 },
+    { cat: 'LEGUMES', nome: 'Jiló', un: 'CX 12-13kg', cxA: 90.00, cxB: 70.00, pesoA: 13, pesoB: 12, precoA: 6.92, precoB: 5.83 },
+    { cat: 'LEGUMES', nome: 'Gengibre', un: 'CX 6-11kg', cxA: 88.00, cxB: 145.00, pesoA: 6, pesoB: 11, precoA: 14.67, precoB: 13.18 },
+    { cat: 'LEGUMES', nome: 'Pepino', un: 'CX 16-17kg', cxA: 98.00, cxB: null, pesoA: 16, pesoB: null, precoA: 6.13, precoB: null },
+    { cat: 'LEGUMES', nome: 'Pimentão Colorido', un: 'CX 8-9kg', cxA: 110.00, cxB: 98.00, pesoA: 8, pesoB: 9, precoA: 13.75, precoB: 10.89 },
+    { cat: 'LEGUMES', nome: 'Pimentão Verde', un: 'CX 9kg', cxA: 88.00, cxB: 80.00, pesoA: 9, pesoB: 9, precoA: 9.78, precoB: 8.89 },
+    { cat: 'LEGUMES', nome: 'Quiabo', un: 'CX 9kg', cxA: 95.00, cxB: null, pesoA: 9, pesoB: null, precoA: 10.56, precoB: null },
+    { cat: 'LEGUMES', nome: 'Repolho Verde', un: 'CX 18-20kg', cxA: 60.00, cxB: 75.00, pesoA: 18, pesoB: 20, precoA: 3.33, precoB: 3.75 },
+    { cat: 'LEGUMES', nome: 'Tomate BC6', un: 'CX 18-20kg', cxA: 180.00, cxB: null, pesoA: 20, pesoB: null, precoA: 9.00, precoB: null },
+    { cat: 'LEGUMES', nome: 'Tomate BC7', un: 'CX 20kg', cxA: 140.00, cxB: null, pesoA: 20, pesoB: null, precoA: 7.00, precoB: null },
+    { cat: 'LEGUMES', nome: 'Tomate Sweet Grape', un: 'CX 12bdj', cxA: 72.00, cxB: 70.00, pesoA: 12, pesoB: 12, precoA: 6.00, precoB: 5.83 },
+    { cat: 'LEGUMES', nome: 'Milho Verde Embalado', un: 'CX 15bdj', cxA: null, cxB: 59.00, pesoA: null, pesoB: 15, precoA: null, precoB: 3.93 },
+    // ALHO, CEBOLA E OVOS
+    { cat: 'ALHO, CEBOLA E OVOS', nome: 'Alho Argentino Nº9', un: 'CX 9.5-9.9kg', cxA: 170.00, cxB: 145.00, pesoA: 9.5, pesoB: 9.9, precoA: 17.89, precoB: 14.65 },
+    { cat: 'ALHO, CEBOLA E OVOS', nome: 'Alho Argentino Nº8', un: 'CX 9.5-9.9kg', cxA: 195.00, cxB: 140.00, pesoA: 9.5, pesoB: 9.9, precoA: 20.53, precoB: 14.14 },
+    { cat: 'ALHO, CEBOLA E OVOS', nome: 'Alho Chinês', un: 'CX 9.5kg', cxA: 165.00, cxB: null, pesoA: 9.5, pesoB: null, precoA: 17.37, precoB: null },
+    { cat: 'ALHO, CEBOLA E OVOS', nome: 'Cebola CX3', un: 'SC 19-19.5kg', cxA: 68.00, cxB: 58.00, pesoA: 19, pesoB: 19.5, precoA: 3.58, precoB: 2.97 },
+    { cat: 'ALHO, CEBOLA E OVOS', nome: 'Cebola Roxa', un: 'SC 19-19.5kg', cxA: 74.00, cxB: 75.00, pesoA: 19, pesoB: 19.5, precoA: 3.89, precoB: 3.85 },
+    { cat: 'ALHO, CEBOLA E OVOS', nome: 'Ovos A Branco Embalado 15Dz', un: 'CX 15dz', cxA: 120.00, cxB: 108.00, pesoA: 15, pesoB: 15, precoA: 8.00, precoB: 7.20 },
+    { cat: 'ALHO, CEBOLA E OVOS', nome: 'Ovos Filmado Branco 30un', un: 'CX 10-12bdj', cxA: null, cxB: 140.00, pesoA: null, pesoB: 12, precoA: null, precoB: 11.67 },
+  ];
+}
+
+// ===== COMPARAÇÃO =====
+// Compara por preço de CAIXA (cxA/cxB), exibe também preço por kg
+function vencedor(a, b) {
+  if (!a && !b) return 'N';
+  if (!a) return 'B';
+  if (!b) return 'A';
+  if (Math.abs(a - b) < 0.01) return 'E';
+  return a < b ? 'A' : 'B';
+}
+
+function mostrarComparacao() {
+  const filtroSelect = document.getElementById('filtro-cat');
+  filtroSelect.innerHTML = '<option value="">Todas as categorias</option>';
+  const cats = [...new Set(dadosComparacao.map(d => d.cat))];
+  cats.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    filtroSelect.appendChild(opt);
+  });
+
+  let vA = 0, vB = 0, emp = 0;
+  dadosComparacao.forEach(p => {
+    const v = vencedor(p.cxA, p.cxB);
+    if (v === 'A') vA++;
+    else if (v === 'B') vB++;
+    else if (v === 'E') emp++;
+  });
+  document.getElementById('r-fornA').textContent = vA;
+  document.getElementById('r-fornB').textContent = vB;
+  document.getElementById('r-empate').textContent = emp;
+  document.getElementById('r-total').textContent = dadosComparacao.length;
+
+  renderTabela(dadosComparacao);
+  document.getElementById('comparar-empty').style.display = 'none';
+  document.getElementById('comparar-content').style.display = 'block';
+}
+
+function renderTabela(dados) {
+  const tbody = document.getElementById('tabela-body');
+  tbody.innerHTML = '';
+  let lastCat = '';
+  dados.forEach(p => {
+    if (p.cat !== lastCat) {
+      const tr = document.createElement('tr');
+      tr.className = 'categoria-row';
+      tr.innerHTML = `<td colspan="6">${p.cat}</td>`;
+      tbody.appendChild(tr);
+      lastCat = p.cat;
+    }
+    // Comparação por caixa, exibição mostra cx e kg
+    const v = vencedor(p.cxA, p.cxB);
+    const ecoCx = (p.cxA && p.cxB) ? Math.abs(p.cxA - p.cxB).toFixed(2) : '-';
+    const fmtA = p.cxA ? `R$ ${p.cxA.toFixed(2)}<span style="font-size:10px;opacity:0.6;font-weight:400"> cx</span>` : '—';
+    const fmtB = p.cxB ? `R$ ${p.cxB.toFixed(2)}<span style="font-size:10px;opacity:0.6;font-weight:400"> cx</span>` : '—';
+    const clA = !p.cxA ? 'indisponivel' : (v === 'A' ? 'vencedor' : v === 'E' ? 'empate' : 'perdedor');
+    const clB = !p.cxB ? 'indisponivel' : (v === 'B' ? 'vencedor' : v === 'E' ? 'empate' : 'perdedor');
+    const vLabel = v === 'A' ? '💚 Forn. A' : v === 'B' ? '🧡 Forn. B' : v === 'E' ? '🤝 Empate' : '⚠️ Só 1 forn.';
+    const tr = document.createElement('tr');
+    tr.dataset.cat = p.cat;
+    tr.dataset.venc = v;
+    tr.dataset.nome = p.nome.toLowerCase();
+    tr.innerHTML = `
+      <td class="nome">${p.nome}</td>
+      <td style="color:#888;font-size:12px">${p.un}</td>
+      <td class="preco ${clA}">${fmtA}${v==='A'?'<span class="vencedor-badge">✓</span>':''}</td>
+      <td class="preco ${clB}">${fmtB}${v==='B'?'<span class="vencedor-badge">✓</span>':''}</td>
+      <td style="font-weight:600;font-size:13px">${vLabel}</td>
+      <td style="font-size:12px;color:${ecoCx!=='-'?'var(--verde)':'#ccc'}">${ecoCx!=='-'?'R$ '+ecoCx:'-'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filtrarTabela() {
+  const busca = document.getElementById('filtro-busca').value.toLowerCase();
+  const cat = document.getElementById('filtro-cat').value;
+  const venc = document.getElementById('filtro-venc').value;
+  const rows = document.querySelectorAll('#tabela-body tr');
+  let lastCatShown = '';
+  rows.forEach(row => {
+    if (row.classList.contains('categoria-row')) {
+      row.style.display = 'none';
+      return;
+    }
+    const okBusca = !busca || row.dataset.nome.includes(busca);
+    const okCat = !cat || row.dataset.cat === cat;
+    const okVenc = !venc || row.dataset.venc === venc;
+    row.style.display = (okBusca && okCat && okVenc) ? '' : 'none';
+    if (okBusca && okCat && okVenc) lastCatShown = row.dataset.cat;
+  });
+  // Mostrar headers de categorias visíveis
+  rows.forEach(row => {
+    if (row.classList.contains('categoria-row')) {
+      const catName = row.querySelector('td').textContent;
+      const temFilhos = [...rows].some(r => !r.classList.contains('categoria-row') && r.dataset.cat === catName && r.style.display !== 'none');
+      row.style.display = temFilhos ? '' : 'none';
+    }
+  });
+}
+
+function irParaPedidos() {
+  montarPedidos();
+  showTab('pedidos');
+}
+
+// ===== PEDIDOS =====
+function montarPedidos() {
+  const grid = document.getElementById('lojas-grid');
+  grid.innerHTML = '';
+  const produtosVencedores = dadosComparacao.filter(p => {
+    const v = vencedor(p.precoA, p.precoB);
+    return v !== 'N' || p.precoA || p.precoB;
+  });
+
+  LOJAS.forEach(loja => {
+    const card = document.createElement('div');
+    card.className = 'loja-card';
+    card.innerHTML = `<h4>🏪 ${loja}</h4>`;
+    produtosVencedores.forEach(p => {
+      const v = vencedor(p.cxA, p.cxB);
+      const forn = v === 'E' ? 'A' : v; // no empate, padrão A
+      const key = `${loja}|||${p.nome}`;
+      if (!quantidades[key]) quantidades[key] = '';
+      const row = document.createElement('div');
+      row.className = 'qtd-row';
+      row.innerHTML = `
+        <div class="qtd-nome">
+          ${p.nome}
+          <span class="forn-tag ${forn==='A'?'forn-a':'forn-b'}">${forn==='A'?'A':'B'}</span>
+        </div>
+        <input class="qtd-input" type="text" placeholder="0" value="${quantidades[key]}"
+          data-loja="${loja}" data-produto="${p.nome}" data-forn="${forn}"
+          oninput="salvarQtd(this)">
+      `;
+      card.appendChild(row);
+    });
+    grid.appendChild(card);
+  });
+
+  document.getElementById('pedidos-empty').style.display = 'none';
+  document.getElementById('pedidos-content').style.display = 'block';
+}
+
+function salvarQtd(el) {
+  const key = `${el.dataset.loja}|||${el.dataset.produto}`;
+  quantidades[key] = el.value;
+}
+
+// ===== WHATSAPP =====
+function gerarWhatsApp() {
+  const blocos = document.getElementById('wpp-blocos');
+  blocos.innerHTML = '';
+  const hoje = new Date().toLocaleDateString('pt-BR');
+
+  // Agrupar por fornecedor e por loja
+  const pedFornA = {}; // {loja: [{nome, qtd, un}]}
+  const pedFornB = {};
+  LOJAS.forEach(l => { pedFornA[l] = []; pedFornB[l] = []; });
+
+  const inputs = document.querySelectorAll('.qtd-input');
+  inputs.forEach(el => {
+    const qtd = el.value.trim();
+    if (!qtd || qtd === '0') return;
+    const loja = el.dataset.loja;
+    const produto = el.dataset.produto;
+    const forn = el.dataset.forn;
+    const p = dadosComparacao.find(d => d.nome === produto);
+    const un = p ? p.un : '';
+    const preco = forn === 'A' ? p?.cxA : p?.cxB;
+    const precoFmt = preco ? preco.toFixed(2).replace('.', ',') : '—';
+    const pesoMatch = un.match(/(\d+[\.,]?\d*\s*(?:kg|un|bdj|dz|pct|bdj))/i);
+    const peso = pesoMatch ? pesoMatch[1] : un;
+    if (forn === 'A') pedFornA[loja].push({ nome: produto, qtd, peso, precoFmt });
+    else pedFornB[loja].push({ nome: produto, qtd, peso, precoFmt });
+  });
+
+  // Formatar quantidade com zero à esquerda
+  const fmtQtd = q => q.padStart(2, '0');
+
+  // Mensagem Fornecedor A
+  let msgA = `🌿 *PEDIDO FÊNIX — ${hoje}*\n_Fornecedor A_\n\n`;
+  LOJAS.forEach(loja => {
+    if (pedFornA[loja].length > 0) {
+      msgA += `📦 *${loja}*\n`;
+      pedFornA[loja].forEach(item => {
+        msgA += `${fmtQtd(item.qtd)} ${item.nome} ${item.peso} - ${item.precoFmt}\n`;
+      });
+      msgA += '\n';
+    }
+  });
+
+  let msgB = `🌿 *PEDIDO FÊNIX — ${hoje}*\n_Fornecedor B_\n\n`;
+  LOJAS.forEach(loja => {
+    if (pedFornB[loja].length > 0) {
+      msgB += `📦 *${loja}*\n`;
+      pedFornB[loja].forEach(item => {
+        msgB += `${fmtQtd(item.qtd)} ${item.nome} ${item.peso} - ${item.precoFmt}\n`;
+      });
+      msgB += '\n';
+    }
+  });
+
+  criarBlocoWpp(blocos, '💚 Fornecedor A — Planilha de Preços', msgA);
+  criarBlocoWpp(blocos, '🧡 Fornecedor B — Lista de Entrega', msgB);
+
+  document.getElementById('wpp-empty').style.display = 'none';
+  document.getElementById('wpp-content').style.display = 'block';
+  showTab('whatsapp');
+  toast('💬 Mensagens geradas!');
+}
+
+function criarBlocoWpp(container, titulo, msg) {
+  const div = document.createElement('div');
+  div.className = 'wpp-block';
+  div.innerHTML = `
+    <h4>${titulo}
+      <button class="copy-btn" onclick="copiar(this, \`${msg.replace(/`/g,'\\`')}\`)">📋 Copiar</button>
+    </h4>
+    <div class="wpp-text">${escHtml(msg)}</div>
+  `;
+  container.appendChild(div);
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copiar(btn, texto) {
+  navigator.clipboard.writeText(texto).then(() => {
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => { btn.innerHTML = '📋 Copiar'; }, 2000);
+    toast('📋 Copiado para a área de transferência!');
+  });
+}
+
+// ===== NAV =====
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  const idx = ['importar','comparar','gerentes','pedidos','whatsapp'].indexOf(id);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+}
+
+// ===== GERENTES =====
+let respostasGerentes = {}; // { loja: { itens: [] } }
+
+function mostrarPainelGerentes() {
+  document.getElementById('gerentes-empty').style.display = 'none';
+  document.getElementById('gerentes-content').style.display = 'block';
+  renderStatusGerentes();
+}
+
+function exportarCotacaoParaGerentes() {
+  // Envia apenas campos essenciais para o gerente — minimiza tamanho do link
+  const produtosEnxutos = dadosComparacao.map(p => ({
+    c: p.cat, n: p.nome, u: p.un,
+    a: p.cxA || null, b: p.cxB || null,
+    pa: p.precoA || null, pb: p.precoB || null
+  }));
+  const payload = { p: produtosEnxutos, d: new Date().toLocaleDateString('pt-BR') };
+  const json = JSON.stringify(payload);
+
+  // Comprime com pako (zlib) antes de codificar — reduz de ~8000 para ~300 chars
+  const compressed = pako.deflate(json, { level: 9 });
+  const b64 = btoa(String.fromCharCode(...compressed))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  const modal = document.getElementById('modal-links');
+  const container = document.getElementById('links-container');
+  container.innerHTML = '';
+
+  const baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+
+  LOJAS.forEach(loja => {
+    const lojaParam = encodeURIComponent(loja);
+    const link = `${baseUrl}cotacao_gerente.html?loja=${lojaParam}&dados=${b64}`;
+
+    const div = document.createElement('div');
+    div.style.cssText = 'background:#f8f8f6;border-radius:10px;padding:14px;margin-bottom:10px';
+    div.innerHTML = `
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:8px">🏪 ${loja}</div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:8px;word-break:break-all">${link.substring(0,80)}...</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button onclick="copiarLink('${link}', this)" style="background:var(--verde);color:white;border:none;border-radius:7px;padding:7px 14px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer">
+          📋 Copiar link
+        </button>
+        <button onclick="abrirWhatsApp('${loja}', '${link}')" style="background:#25D366;color:white;border:none;border-radius:7px;padding:7px 14px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer">
+          📲 Enviar WhatsApp
+        </button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  modal.style.display = 'flex';
+}
+
+function copiarLink(link, btn) {
+  navigator.clipboard.writeText(link).then(() => {
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => btn.textContent = '📋 Copiar link', 2000);
+  });
+}
+
+function abrirWhatsApp(loja, link) {
+  const msg = encodeURIComponent(`🌿 *Cotação Fênix — ${new Date().toLocaleDateString('pt-BR')}*\n\nOlá! Segue o link para você preencher as quantidades da *${loja}* de hoje:\n\n${link}\n\nAbra no navegador, preencha e me mande o resultado pelo WhatsApp. 👍`);
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+
+function fecharModal() {
+  document.getElementById('modal-links').style.display = 'none';
+}
+
+function importarRespostas(e) {
+  const files = Array.from(e.target.files);
+  let count = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        respostasGerentes[data.loja] = data;
+        data.itens.forEach(item => {
+          const key = `${data.loja}|||${item.produto}`;
+          quantidades[key] = item.qtd || item.quantidade || '';
+        });
+        count++;
+        renderStatusGerentes();
+        if (count === files.length) toast(`✅ ${count} resposta(s) importada(s)!`);
+      } catch { alert(`Erro ao ler arquivo: ${file.name}`); }
+    };
+    reader.readAsText(file);
+  });
+  e.target.value = '';
+}
+
+// Receber resposta via texto colado (para quando gerente manda pelo WhatsApp)
+function processarRespostaTexto() {
+  const texto = document.getElementById('resposta-texto').value.trim();
+  if (!texto) return;
+  try {
+    // Descomprimir: base64url → bytes → pako inflate → JSON
+    const b64 = texto.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const json = pako.inflate(bytes, { to: 'string' });
+    const data = JSON.parse(json);
+    respostasGerentes[data.loja] = data;
+    data.itens.forEach(item => {
+      const key = `${data.loja}|||${item.produto}`;
+      quantidades[key] = item.qtd || item.quantidade || '';
+    });
+    document.getElementById('resposta-texto').value = '';
+    renderStatusGerentes();
+    toast(`✅ Resposta de ${data.loja} importada!`);
+  } catch { toast('❌ Código inválido. Verifique e tente novamente.'); }
+}
+
+function renderStatusGerentes() {
+  const container = document.getElementById('status-gerentes');
+  container.innerHTML = '';
+  const respondidas = Object.keys(respostasGerentes).length;
+  document.getElementById('pill-gerentes').textContent = `${respondidas} / 4`;
+
+  LOJAS.forEach(loja => {
+    const resp = respostasGerentes[loja];
+    const div = document.createElement('div');
+    div.style.cssText = `background:white;border-radius:12px;padding:16px;box-shadow:var(--sombra);border-left:4px solid ${resp ? 'var(--verde-claro)' : '#e0e0e0'}`;
+    div.innerHTML = `
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px">${loja}</div>
+      ${resp
+        ? `<div style="color:var(--verde);font-size:12px">✅ Recebido em ${resp.data}<br><span style="color:#888">${resp.itens.length} produtos preenchidos</span></div>`
+        : `<div style="color:#bbb;font-size:12px">⏳ Aguardando resposta...</div>`
+      }
+    `;
+    container.appendChild(div);
+  });
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
